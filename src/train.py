@@ -1,21 +1,41 @@
 from gymnasium.wrappers import TimeLimit
 from env_hiv import HIVPatient
+from train_dqn import greedy_action
+from train_dqn import DQM_model
+import numpy as np
+import random
+import os
+import json
 
-env = TimeLimit(
-    env=HIVPatient(domain_randomization=False), max_episode_steps=200
-)  # The time wrapper limits the number of steps in an episode at 200.
-# Now is the floor is yours to implement the agent and train it.
+import torch
+import torch.nn as nn
+import torch.optim as optim
 
 
-# You have to implement your own agent.
-# Don't modify the methods names and signatures, but you can add methods.
-# ENJOY!
+# env = TimeLimit(
+#     env=HIVPatient(domain_randomization=True), max_episode_steps=200
+# )  # The time wrapper limits the number of steps in an episode at 200.
+# # Now is the floor is yours to implement the agent and train it.
+
+
 class ProjectAgent:
-    def act(self, observation, use_random=False):
-        return 0
 
+    def act(self, observation):
+        s = observation
+        a = greedy_action(self.model, s)
+        return a
+    
     def save(self, path):
-        pass
+        print(f"saving model to {path}")
+        torch.save({
+                    'model_state_dict': self.model.state_dict(),
+                    }, path)
 
     def load(self):
-        pass
+        path = "model_saved_500ep.pt"
+        self.model = DQM_model()
+        # Load model
+        model_saved = torch.load("model_saved_500ep.pt")
+        self.model.load_state_dict(model_saved['model_state_dict'])
+        self.model.eval() 
+        print(f"Model loaded from {path}")
