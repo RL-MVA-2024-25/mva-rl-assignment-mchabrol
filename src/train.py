@@ -32,10 +32,10 @@ class ProjectAgent:
                     }, path)
 
     def load(self):
-        path = "model_saved_500ep.pt"
+        path = "model_saved.pt"
         self.model = DQM_model()
         # Load model
-        model_saved = torch.load("model_saved_500ep.pt")
+        model_saved = torch.load("model_saved.pt")
         self.model.load_state_dict(model_saved['model_state_dict'])
         self.model.eval() 
         print(f"Model loaded from {path}")
