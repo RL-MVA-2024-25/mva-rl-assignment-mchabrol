@@ -1,6 +1,6 @@
 from gymnasium.wrappers import TimeLimit
 from env_hiv import HIVPatient
-from fast_env import FastHIVPatient
+#from fast_env import FastHIVPatient
 from train_dqn import greedy_action
 from train_dqn import DQN_model
 import numpy as np
