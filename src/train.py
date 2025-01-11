@@ -34,7 +34,7 @@ class ProjectAgent:
 
     def load(self):
         path = "model_saved.pt" 
-        self.model = DQN_model(hidden_dim = 256)
+        self.model = DQN_model()
         # Load model
         model_saved = torch.load("model_saved.pt")
         self.model.load_state_dict(model_saved['model_state_dict'])
