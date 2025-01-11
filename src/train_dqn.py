@@ -1,5 +1,6 @@
 from gymnasium.wrappers import TimeLimit
 from env_hiv import HIVPatient
+from fast_env import FastHIVPatient
 import random
 import torch
 import numpy as np
@@ -43,7 +44,7 @@ def greedy_action(network, state):
         Q = network(torch.Tensor(state).unsqueeze(0).to(device))
         return torch.argmax(Q).item()
 
-class dqn_agent:
+class DQN:
     def __init__(self, config, model):
 
         device = "cuda" if next(model.parameters()).is_cuda else "cpu"
@@ -87,10 +88,10 @@ class dqn_agent:
         episode_return = []
         episode = 0
         cumulative_reward_ep = 0
-        state, _ = env.reset()
         epsilon = self.epsilon_max
         step = 0
         reward_best_model = 0
+        state, _ = env.reset()
         while episode < max_episode:
             # update epsilon
             if step > self.epsilon_delay:
@@ -101,8 +102,8 @@ class dqn_agent:
             else:
                 action = greedy_action(self.model, state)
             # step
-            next_state, reward, done, trunc, _ = env.step(action)
-            self.memory.append(state, action, reward, next_state, done)
+            y, reward, done, trunc, _ = env.step(action)
+            self.memory.append(state, action, reward, y, done)
             cumulative_reward_ep += reward
             # train
             for _ in range(self.nb_gradient_steps): 
@@ -131,20 +132,20 @@ class dqn_agent:
                     torch.save({
                     'model_state_dict': self.target_model.state_dict(),
                     'reward': cumulative_reward_ep,
-                    }, f"model_saved.pt")
+                    }, f"model_saved_test.pt")
                     reward_best_model = cumulative_reward_ep
                 
                 state, _ = env.reset()
                 cumulative_reward_ep = 0
             else:
-                state = next_state
+                state = y
             
         return episode_return 
     
 
-class DQM_model(torch.nn.Module):
-    def __init__(self, input_dim = 6, hidden_dim = 256, output_dim = 4, depth = 6):
-        super(DQM_model, self).__init__()
+class DQN_model(torch.nn.Module):
+    def __init__(self, input_dim = 6, hidden_dim = 270, output_dim = 4, depth = 5):
+        super(DQN_model, self).__init__()
         self.input_layer = torch.nn.Linear(input_dim, hidden_dim)
         self.hidden_layers = torch.nn.ModuleList([torch.nn.Linear(hidden_dim, hidden_dim) for _ in range(depth - 1)])
         self.output_layer = torch.nn.Linear(hidden_dim, output_dim)
@@ -159,23 +160,23 @@ class DQM_model(torch.nn.Module):
 
 if __name__ == "__main__":
     # Initalize the model
-    model = DQM_model().to(device)
+    model = DQN_model().to(device)
 
     # DQN configuration
     config = {'nb_actions': env.action_space.n,
             'learning_rate': 0.001,
             'gamma': 0.99,
-            'buffer_size': 1_000_000,
+            'buffer_size': 2_000_000,
             'epsilon_min': 0.01,
             'epsilon_max': 1.,
             'epsilon_decay_period': 15_000,
             'epsilon_delay_decay': 4_000,
-            'batch_size': 1000,
+            'batch_size': 2000,
             'gradient_steps': 1,
-            'update_target_freq': 400,
+            'update_target_freq': 500,
             'criterion': torch.nn.SmoothL1Loss()
             }
 
     # Train agent
-    agent = dqn_agent(config, model)
+    agent = DQN(config, model)
     episode_return = agent.train(env, 200)

@@ -1,7 +1,8 @@
 from gymnasium.wrappers import TimeLimit
 from env_hiv import HIVPatient
+from fast_env import FastHIVPatient
 from train_dqn import greedy_action
-from train_dqn import DQM_model
+from train_dqn import DQN_model
 import numpy as np
 import random
 import os
@@ -32,10 +33,10 @@ class ProjectAgent:
                     }, path)
 
     def load(self):
-        path = "model_saved.pt"
+        path = "model_saved_test.pt"
         self.model = DQM_model()
         # Load model
-        model_saved = torch.load("model_saved.pt")
+        model_saved = torch.load("model_saved_test.pt")
         self.model.load_state_dict(model_saved['model_state_dict'])
         self.model.eval() 
         print(f"Model loaded from {path}")
