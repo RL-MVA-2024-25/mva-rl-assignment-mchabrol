@@ -144,7 +144,7 @@ class DQN:
     
 
 class DQN_model(torch.nn.Module):
-    def __init__(self, input_dim = 6, hidden_dim = 256, output_dim = 4, depth = 5):
+    def __init__(self, input_dim = 6, hidden_dim = 256, output_dim = 4, depth = 6): #270, 5
         super(DQN_model, self).__init__()
         self.input_layer = torch.nn.Linear(input_dim, hidden_dim)
         self.hidden_layers = torch.nn.ModuleList([torch.nn.Linear(hidden_dim, hidden_dim) for _ in range(depth - 1)])
